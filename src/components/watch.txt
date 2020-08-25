@@ -1,0 +1,251 @@
+//1-下面是使用reactive,--单个数据
+<template>
+  <div class="hello">
+    <!-- 创建的只读属性-->
+    <p>{{state}}-触发set</p>
+    <!-- <p>{{newC}}-触发get</p>
+    <button @click="state+=1">点击</button> -->
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const state = reactive({ count: 0 });
+    watch(
+      () => state.count,//定义监控变量
+      (newValue, oldValue) => {
+        console.log(newValue, oldValue) //若无lazy:true,结果为 0 undefined, 1 0,使用lazy:true,结果是1,0
+      },
+      {
+        lazy: true  //这个属性,作用使组件首次不加载
+      }
+    ); //组件在初始化的时候回执行watch
+    setTimeout(() => {
+      state.count += 1;
+    }, 500);
+    return {
+      state,
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+//2-使用watch监控ref定义的数据--单个数据
+<template>
+  <div class="hello">
+    <!-- 创建的只读属性-->
+    <p>{{state}}-触发set</p>
+    <!-- <p>{{newC}}-触发get</p>
+    <button @click="state+=1">点击</button> -->
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const state = ref(7);
+    watch(
+      state,//定义监控变量
+      (newValue, oldValue) => {
+        console.log(newValue, oldValue) //若无lazy:true,结果为 7 undefined, 8 7,使用lazy:true,结果是8,7
+      },
+      {
+        lazy: true  //这个属性,作用使组件首次不加载
+      }
+    ); //组件在初始化的时候回执行watch
+    setTimeout(() => {
+      state.value += 1;
+    }, 500);
+    return {
+      state,
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+//3-使用reactive监控数据--多个数据
+<template>
+  <div class="hello">
+    <!-- 创建的只读属性-->
+    <p>{{state}}-触发set</p>
+    <!-- <p>{{newC}}-触发get</p>
+    <button @click="state+=1">点击</button> -->
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const state = reactive({ num: 1, name: '王' });
+    watch(
+      [() => state.num, () => state.name],//定义监控变量
+      ([newNum, newName], [oldNum, oldName]) => {
+        console.log(newNum, newName, "new") // 2 张
+        console.log(oldNum, oldName, "old")// 1 王
+      },
+      //   {
+      //     lazy: true  //这个属性,作用使组件首次不加载
+      //   }
+    ); //组件在初始化的时候回执行watch
+    setTimeout(() => {
+      state.num += 1;
+      state.name = '张';
+    }, 500);
+    return {
+      state,
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+//4-使用ref监控多个数据--建议使用的方法
+<template>
+  <div class="hello">
+    <!-- 创建的只读属性-->
+    <p>{{num}}-{{name}}</p>
+    <!-- <p>{{newC}}-触发get</p>
+    <button @click="state+=1">点击</button> -->
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const num = ref(0);
+    const name = ref('王');
+    watch(
+      [num, name],//定义监控变量
+      ([newNum, newName], [oldNum, oldName]) => {
+        console.log(newNum, newName, "new") // 2 张
+        console.log(oldNum, oldName, "old")// 1 王
+      },
+      //   {
+      //     lazy: true  //这个属性,作用使组件首次不加载
+      //   }
+    ); //组件在初始化的时候回执行watch
+    setTimeout(() => {
+      num.value += 1;
+      name.value = '张';
+    }, 500);
+    return {
+      num,
+      name
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+//清除某一个watch
+<template>
+  <div class="hello">
+    <!-- 创建的只读属性-->
+    <p>{{num}}</p>
+    <!-- <p>{{newC}}-触发get</p> -->
+    <button @click="clearWatch">点击</button>
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const num = ref(0);
+    const stop = watch(  //这里定义的stop就是watch的返回值,stop是一个函数,将函数return出去,只要调用就会清除这个watch
+      num,//定义监控变量
+      (newNum, oldNum) => {
+        console.log("监听到数据了")
+        console.log(newNum, oldNum, "new") // 2 张
+        console.log(num.value) // 2 张
+      },
+      {
+        lazy: true  //这个属性,作用使组件首次不加载
+      }
+    ); //组件在初始化的时候回执行watch
+    const clearWatch = () => {
+      stop();  //测试的时候没有生效
+    }
+    setTimeout(() => {
+      num.value += 1;
+    }, 1500);
+    return {
+      num,
+      stop,
+      clearWatch
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
+//清除watch中的无效异步
+<template>
+  <div class="hello">
+    <input type="text" v-model="keyWord">
+  </div>
+</template>
+<script>
+import { ref, watch, reactive } from '@vue/composition-api';
+
+export default {
+  name: 'HelloWorld',
+  setup() {
+    const keyWord = ref('');
+    //打印函数-时时打印,只要触发就会打印
+    // const printF = (val) => {
+    //   console.log(val)
+    // }
+    //异步打印函数-只打印最后一次的数据
+    const asyncPrintF = (val) => {
+      //创建异步打印
+      return setTimeout(() => {
+        console.log(val)
+      }, 1000);
+    }
+    //监听数据变化
+    watch(
+      keyWord,
+      (newVal, oldVal, onClear) => {
+        // printF(newVal) //此时的打印是只要触发就会打印
+        const timerId = asyncPrintF(newVal)// 每次触发都会生成一个id
+        //清除未完成的计时器,相当于优化
+        onClear(() => {
+          clearTimeout(timerId)
+        })
+
+      },
+      { lazy: true } //初始化的时候不渲染
+    )
+    return {
+      keyWord
+    };
+  },
+};
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped lang="scss">
+</style>
